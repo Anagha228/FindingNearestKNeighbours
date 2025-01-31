@@ -1,12 +1,25 @@
+#include "given.h"
+
+//helper function to sort(algorithm)
+void sortDistances(float distances[NUM_SAMPLES], int indices[NUM_SAMPLES], int isAscending);
+
+//helper function to  read test data
+int readFromTestFile(char fileName[30], struct Animal testData [NUM_TEST_DATA]);
+
+
 int main(int argc, char* argv[]) {
     struct Animal dataZoo [NUM_SAMPLES];
+    struct Animal dataZoo1 [NUM_SAMPLES];
     struct Animal testData [NUM_TEST_DATA];
+    struct Animal testData1 [NUM_TEST_DATA];
     int v1[NUM_FEATURES] = {1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1};
     int v2[NUM_FEATURES] = {1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 4, 0, 0, 1};
     float euclideanDistance, jaccardSimilarity;
     int hammingDistance;
     int newSample [NUM_FEATURES] = {1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1};
     int k =5, myClass;
+    float myAccuracy=0;
+    float myAccuracy2;
     //int whichDistanceFunction=1; 
     int kNearestNeighbors [NUM_SAMPLES];
 
@@ -64,7 +77,14 @@ int main(int argc, char* argv[]) {
     
     // task 5
     readFromTestFile(argv[2], testData);
-    findAccuracy(dataZoo, 1, testData, k);
+    //readFromTestFile(argv[2], testData1);
+    //findAccuracy(dataZoo, 1, testData, k);
+    
 
+    myAccuracy=findAccuracy(dataZoo, 3, testData, k);
+    printf("\nThe accuracy for the test data is %f", myAccuracy);
+    myAccuracy2=0;
+    
+    //myAccuracy2=findAccuracy(dataZoo, 3, testData, k);
     return 0;
 }

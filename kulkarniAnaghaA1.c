@@ -1,4 +1,5 @@
-/* Task 1 */
+#include "given.h"
+
 int readFromFile (  char fName [30], 
                     struct Animal dataZoo [NUM_SAMPLES]){
                 
@@ -200,8 +201,8 @@ int predictClass (  struct Animal dataZoo [NUM_SAMPLES],
                     int whichDistanceFunction, 
                     int k){
     int kNearestNeighbors [NUM_SAMPLES];
-    int myClasses[k];
-    int UniqueClass[k], sameClass =0, myCount[k]; 
+    int myClasses[k], nOU, myMax, predictClass =9999;
+    int UniqueClass[k], myCount[k]; 
 
     findKNearestNeighbors(dataZoo, newSample, k, whichDistanceFunction,kNearestNeighbors);
 
@@ -213,31 +214,49 @@ int predictClass (  struct Animal dataZoo [NUM_SAMPLES],
     //printf("end of for loop\n");
     for (int i = 0; i<k; i++){
         UniqueClass[i]=0;
+        myCount [i] =0;
     }
 
     UniqueClass[0] = myClasses[0];
 
     //printf("start of sorting the classes\n");
-    for (int i = 1; i<k; i++){
+    for (int i = 0; i<k; i++){
+        //printf ("\n all class %d\n", myClasses[i]);
         for (int j = 0; j<k; j++){
-            if (myClasses[i] == UniqueClass[j]){
+            //printf("\n%d UniqueClass, %d myClasses", UniqueClass[j], myClasses[i]);
+            if (myClasses[i] == UniqueClass[j] && UniqueClass[j] !=0){
+                //printf ("\n double class found %d\n", myClasses[i]);
                 myCount[j]++;
                 break;
-            }else{
-                
-                if(UniqueClass[j] == 0){
-                    UniqueClass[j] = myClasses[i];
-                    break;
-                }
-                
             }
+                
+            if(UniqueClass[j] == 0){
+                UniqueClass[j] = myClasses[i];
+                //printf ("\n i = [%d] new class found[%d] %d\n",i, j,UniqueClass[j]);
+                nOU =j;
+                myCount[j]++;
+                break;
+            }   
         }
-        
-        //printf("\n%d firstClass, %d myClasses[%d]", firstClass, myClasses[i], i);
     }
-    //printf ("\n%d\n", firstClass);
+    
+    myMax =0;
+    for (int i=0; i<=nOU; i++){
+        if (myCount[i]> myMax){
+            myMax= myCount[i];
+            predictClass = UniqueClass[i];
+            
+        } else if (myCount[i] == myMax){
+            if (predictClass> UniqueClass[i]){
+                predictClass = UniqueClass[i];
+            }
 
-    //return firstClass; 
+        }
+        //printf("\n%d UniqueClass, %d myCount[%d]", UniqueClass[i], myCount[i], i);
+    }
+
+    //printf("\n\n%d predict %d max", predictClass, myMax);
+    return predictClass; 
 }
 
 /* Task 5 */
@@ -245,18 +264,39 @@ float findAccuracy (struct Animal dataZoo [NUM_SAMPLES],
                     int whichDistanceFunction, 
                     struct Animal testData [NUM_TEST_DATA], 
                     int k){
-    
-    
-    
-    //predictClass(dataZoo, testData[i].features, 1);
+    int myPredictedClass[NUM_TEST_DATA];
+    float myCounter=0;
+    float myAccuracyPercent;
+    for (int i =0; i<NUM_TEST_DATA; i++){
+        myPredictedClass[i] =  predictClass(dataZoo, testData[i].features, whichDistanceFunction, k);
+        //printf("my predicted: %d\n", myPredictedClass[i]);
+        //printf("my accual: %d", testData[i].classLabel );
+        //printf("my predicted: %d , my accual: %d", myPredictedClass[i], testData[i].classLabel );
+        if (myPredictedClass[i] == testData[i].classLabel){
+            myCounter++;
 
+        }
+    }
+
+    for (int i =0; i<NUM_TEST_DATA; i++){
+        //printf("\nmy predicted: %d , my accual: %d", myPredictedClass[i], testData[i].classLabel );
+        printf("%d ", myPredictedClass[i]);
+    }
+    myAccuracyPercent = (myCounter)/((float)NUM_TEST_DATA);
+    //predictClass(dataZoo, testData[i].features, 1, k);
+    printf("\n%f %f my accuracy",(myCounter), myAccuracyPercent);
+    return myAccuracyPercent;
 }
 
+
+// helper function reads test data
 int readFromTestFile(char fileName[30], struct Animal testData [NUM_TEST_DATA]){
-    char allData[NUM_SAMPLES][NUM_TEST_DATA];
-    int noOfRows=0, i, x=0; 
+    char allData[NUM_TEST_DATA][NUM_SAMPLES];
+    int x=0;
+    //int j; 
     char * token;
     FILE * fptr = fopen (fileName, "r");
+    
     
     if (fptr == NULL) {
         printf("Could not open file %s\n", fileName);
@@ -265,20 +305,34 @@ int readFromTestFile(char fileName[30], struct Animal testData [NUM_TEST_DATA]){
         while (!feof (fptr) || x<NUM_TEST_DATA){
         
             fgets(allData[x],NUM_SAMPLES, fptr );
-            printf("%s\n", allData[x]);
+            //printf("Fgets all data %s\n", allData[x]);
+            token = strtok(allData[x], ",");
             
-            x++;
-
-            i = 0;
-            while (token != NULL) {
-                token = strtok(allData[x], ",");
-                printf("token: %s\n", token);
-                testData[i].animalName = token;
-                token = strtok(NULL, ",");
-                printf("Name: %s\n",testData[i].animalName);
-                i++ 2;
+            //printf("token: %s\n", token);
+            strcpy(testData[x].animalName, token);
+            //printf("\nName: %s  ",testData[x].animalName);
                 
-            }
+            
+
+            //j=0;
+            //while (token != NULL) {
+                
+                
+                for (int j =0; j<NUM_FEATURES; j++){
+                    
+                    token = strtok(NULL, ",");
+                    testData[x].features[j] = atoi(token);
+                    //printf("Features:%d ", testData[x].features[j]);
+                }
+                token = strtok(NULL, ",");
+                testData[x].classLabel = atoi(token);
+                //printf("  class label: %d\n\n", testData[x].classLabel);
+                
+                //j++;
+                
+            //}
+            x++;
+            //printf("Name: %s\n",testData[i].animalName);
         }
 
     }
