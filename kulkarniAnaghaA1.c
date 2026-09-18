@@ -18,21 +18,12 @@ int readFromFile (  char fName [30],
     }
     else {
         while ((!feof (fileHandle)) && (noOfRows <= 100)){
-            
-            //printf("Hello!");
-
-            // int c;
-            // while ((c = getchar()) != '\n' && c != EOF) { }
 
             fgets(allData[noOfRows], NUM_SAMPLES, fileHandle);
-            //printf("%s allData\n", allData[noOfRows]);
             noOfRows = noOfRows+1;
         }
         fclose(fileHandle);
-        //printf("loop ends, %d\n", noOfRows);
-        //printf("thius is %s", allData);
         for(int i = 0; i<100; i++){
-            //printf("%d , in for loop ", i);
             sscanf(allData[i], "%s %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d"
             ,dataZoo[i].animalName
             ,&dataZoo[i].features[0]
@@ -52,10 +43,7 @@ int readFromFile (  char fName [30],
             ,&dataZoo[i].features[14]
             ,&dataZoo[i].features[15]
             , &dataZoo[i].classLabel);
-            
-            //printf("after sscanf\n");
-            //printf("%s\n", &dataZoo[i].animalName);
-        }
+            }
         
         return 1;
         
@@ -80,13 +68,10 @@ void distanceFunctions (int vector1 [NUM_FEATURES],
         
         sum = (vector1[i] - vector2[i]);
         powerSum= pow(sum, 2) + powerSum; 
-        //printf("vector 1 : %d vector 2: %d i = %d sum = %f power sum = %f \n", 
-        //vector1[i],vector2[i], i, sum, powerSum);
     }
 
     *euclideanDistance = pow(powerSum, 0.5);
-    //printf("\nfunc print: euclideanDistance %.2f\n", *euclideanDistance);
-
+    
     *hammingDistance = 0;
 
     for (int i = 0; i<=15; i++){
@@ -96,9 +81,6 @@ void distanceFunctions (int vector1 [NUM_FEATURES],
 
     }//loop end 
     *hammingDistance = *hammingDistance+ 0;
-    //printf("func print: hamming distance %d \n", *hammingDistance); 
-
-
     for (int i = 0; i<=15; i++){
 
         if(vector1[i] == 1 && vector2[i] == 1){
@@ -113,9 +95,6 @@ void distanceFunctions (int vector1 [NUM_FEATURES],
 
     difference = NUM_FEATURES-zeroMatch;
     *jaccardSimilarity = oneMatch/difference;
-
-    //printf("func print: jaccard Similarity %.2f\n", *jaccardSimilarity);
-
 }//task 2 done 
 
 // Task 3 
@@ -149,33 +128,19 @@ void findKNearestNeighbors (struct Animal dataZoo [NUM_SAMPLES],
         }else if (whichDistanceFunction == 3){
             tempDistance[i] = jaccardSimilarity;
         }
-
-        //printf("%f ",tempDistance[i]);
-
-    
-    }//printf("\nloop ends temp distance was printed\n\n\n");
+    }
 
     if(whichDistanceFunction== 1||whichDistanceFunction == 2){
         sortDistances(tempDistance, indices, 1);
     }else if (whichDistanceFunction == 3){
         sortDistances(tempDistance, indices, 0);
     }
-    // printf("indices: ");
-    // for (int j = 0; j < k; j++) {
-    //     printf("%d  ", indices[j]);
-    // }
-    // printf("\n");
-
     for (j = 0; j < k; j++) {
         kNearestNeighbors[j] = indices[j];
-        //printf("%d ",kNearestNeighbors[j]);
-    }//printf("\n %d loop ends KNearestNeighbors was printed\n", j);
-
-
-
+    }
 } //task 3 done 
 
-//sorting funtion from chatgpt used bubble sort 
+//sorting funtion 
 void sortDistances(float distances[NUM_SAMPLES], int indices[NUM_SAMPLES], int isAscending) {
     for (int i = 0; i < NUM_SAMPLES - 1; i++) {
         for (int j = 0; j < NUM_SAMPLES - i - 1; j++) {
@@ -211,10 +176,7 @@ int predictClass (  struct Animal dataZoo [NUM_SAMPLES],
    // printf("in find nearest\n");
     for(int i = 0; i<k; i++){
         myClasses[i]= dataZoo[kNearestNeighbors[i]].classLabel; 
-        //printf("%d kNearestNeighbors %d class label through dataZoo %d myClasses\n", 
-        //kNearestNeighbors[i], dataZoo[kNearestNeighbors[i]].classLabel, myClasses[i]);
     }
-    //printf("end of for loop\n");
     for (int i = 0; i<k; i++){
         UniqueClass[i]=0;
         myCount [i] =0;
@@ -249,31 +211,16 @@ int predictClass (  struct Animal dataZoo [NUM_SAMPLES],
             myMax= myCount[i];
             //predictClass = UniqueClass[i];
         }  
-        // } else if (myCount[i] == myMax){
-        //     if (predictClass> UniqueClass[i]){
-        //         predictClass = UniqueClass[i];
-        //     }
-
-    
-        //printf("\n%d UniqueClass, %d myCount[%d]", UniqueClass[i], myCount[i], i);
     }
-    //printf("\n max count = %d", myMax);
-    //predictClass = 0;
+    
     for (int i=0; i<=nOU; i++){
         if (myCount[i] == myMax){
             //printf("\n%d UniqueClass, %d myCount[%d]", UniqueClass[i], myCount[i], i);
             if (predictClass>UniqueClass[i]){
                 predictClass = UniqueClass[i];
             }
-            
-            
-        }  
-       
-    
-        //printf("\n%d UniqueClass, %d myCount[%d]", UniqueClass[i], myCount[i], i);
+         }  
     }
-
-    //printf("\n\n%d predict %d max", predictClass, myMax);
     return predictClass; 
 }
 
@@ -291,9 +238,6 @@ float findAccuracy (struct Animal dataZoo [NUM_SAMPLES],
     for (int i =0; i<NUM_TEST_DATA; i++){
         //printf("Calling predict class\n");
         myPredictedClass[i] =  predictClass(dataZoo, testData[i].features, whichDistanceFunction, k);
-        //printf("my predicted: %d\n", myPredictedClass[i]);
-        //printf("my accual: %d", testData[i].classLabel );
-        //printf("my predicted: %d , my accual: %d", myPredictedClass[i], testData[i].classLabel );
         if (myPredictedClass[i] == testData[i].classLabel){
             myCounter++;
 
@@ -307,9 +251,6 @@ float findAccuracy (struct Animal dataZoo [NUM_SAMPLES],
     }
     
     myAccuracyPercent = (myCounter)/((float)NUM_TEST_DATA);
-    
-    //printf("%f\n", a);
-    //predictClass(dataZoo, testData[i].features, 1, k);
 
     printf("\n%.f \n%d ",myCounter, NUM_TEST_DATA);
     return myAccuracyPercent;
@@ -336,14 +277,7 @@ int readFromTestFile(char fileName[30], struct Animal testData [NUM_TEST_DATA]){
             
             //printf("token: %s\n", token);
             strcpy(testData[x].animalName, token);
-            //printf("\nName: %s  ",testData[x].animalName);
-                
-            
-
-            //j=0;
-            //while (token != NULL) {
-                
-                
+           
                 for (int j =0; j<NUM_FEATURES; j++){
                     
                     token = strtok(NULL, ",");
@@ -352,12 +286,8 @@ int readFromTestFile(char fileName[30], struct Animal testData [NUM_TEST_DATA]){
                 }
                 token = strtok(NULL, ",");
                 testData[x].classLabel = atoi(token);
-                //printf("  class label: %d\n\n", testData[x].classLabel);
                 
-                //j++;
-                
-            //}
-            x++;
+                x++;
             //printf("Name: %s\n",testData[i].animalName);
         }
 
